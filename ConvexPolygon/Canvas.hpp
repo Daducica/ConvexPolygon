@@ -10,7 +10,7 @@ namespace UI
 {
     class Canvas : public wxPanel
     {
-        std::unordered_set<Geometry::Point, Geometry::Point::HashFunction> points;
+        Geometry::PointSet points;
 
         void PaintNow ();
         void Render (wxDC& dc);

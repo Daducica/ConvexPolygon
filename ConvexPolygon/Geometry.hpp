@@ -2,6 +2,7 @@
 #define GEOMETRY_HPP
 
 #include <memory>
+#include <unordered_set>
 
 namespace Geometry
 {
@@ -21,6 +22,9 @@ namespace Geometry
             size_t operator() (const Point& point) const;
         };
     };
+
+
+    typedef std::unordered_set<Point, Point::HashFunction> PointSet;
 
 
     struct GeneralLine
@@ -46,6 +50,9 @@ namespace Geometry
 
         VerticalLine (int x) : x (x) {}
     };
+
+
+    Point FindLeftMostPoint (const PointSet& points);
 }
 
 

@@ -47,4 +47,21 @@ namespace Geometry
         yOffset = point1.y - slope * point1.x;
     }
 
+
+    // if multiple points have the same x coord, return the bottom one
+    Point FindLeftMostPoint (const PointSet& points)
+    {
+        assert (points.size () > 0);
+
+        Point leftMostPoint = *points.begin ();
+        for (const Point& point : points) {
+            if (leftMostPoint.x > point.x) {
+                leftMostPoint = point;
+            } else if (leftMostPoint.x == point.x) {
+                if (leftMostPoint.y > point.y)
+                    leftMostPoint = point;
+            }
+        }
+        return leftMostPoint;
+    }
 }

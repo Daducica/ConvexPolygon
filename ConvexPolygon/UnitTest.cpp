@@ -71,5 +71,29 @@ namespace Test
 			assert (mathematicalLine->slope - ((double)1 / 6) < eps);
 			assert (mathematicalLine->yOffset - (-1 - (double)2 / 6) < eps);
 		}
+
+		{ // find leftmost point - one-point set
+			PointSet points = { {-2,-1} };
+			const Point leftMostPoint = FindLeftMostPoint (points);
+			assert (leftMostPoint == Point(-2,-1));
+		}
+
+		{ // find leftmost point - simple set
+			PointSet points = {{-2,-1}, {12,-2}, {0,5}};
+			const Point leftMostPoint = FindLeftMostPoint (points);
+			assert (leftMostPoint == Point (-2,-1));
+		}
+
+		{ // find leftmost point - multiple point with the same x coord
+			PointSet points = {{-2,3}, {-2,-1}, {-2,-2}, {0,5}};
+			const Point leftMostPoint = FindLeftMostPoint (points);
+			assert (leftMostPoint == Point (-2,-2));
+		}
+
+		{ // find leftmost point - multiple point with the same x coord (different order)
+			PointSet points = {{-2,-1}, {-2,-2}, {-2,3}, {0,5}};
+			const Point leftMostPoint = FindLeftMostPoint (points);
+			assert (leftMostPoint == Point (-2, -2));
+		}
 	}
 }
