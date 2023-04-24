@@ -73,27 +73,83 @@ namespace Test
 		}
 
 		{ // find leftmost point - one-point set
-			PointSet points = { {-2,-1} };
+			const PointSet points = { {-2,-1} };
 			const Point leftMostPoint = FindLeftMostPoint (points);
 			assert (leftMostPoint == Point(-2,-1));
 		}
 
 		{ // find leftmost point - simple set
-			PointSet points = {{-2,-1}, {12,-2}, {0,5}};
+			const PointSet points = {{-2,-1}, {12,-2}, {0,5}};
 			const Point leftMostPoint = FindLeftMostPoint (points);
 			assert (leftMostPoint == Point (-2,-1));
 		}
 
 		{ // find leftmost point - multiple point with the same x coord
-			PointSet points = {{-2,3}, {-2,-1}, {-2,-2}, {0,5}};
+			const PointSet points = {{-2,3}, {-2,-1}, {-2,-2}, {0,5}};
 			const Point leftMostPoint = FindLeftMostPoint (points);
 			assert (leftMostPoint == Point (-2,-2));
 		}
 
 		{ // find leftmost point - multiple point with the same x coord (different order)
-			PointSet points = {{-2,-1}, {-2,-2}, {-2,3}, {0,5}};
+			const PointSet points = {{-2,-1}, {-2,-2}, {-2,3}, {0,5}};
 			const Point leftMostPoint = FindLeftMostPoint (points);
 			assert (leftMostPoint == Point (-2, -2));
+		}
+
+		{ // find point with smallest slope - easy case
+			const Point startPoint {0, 0};
+			const PointSet points = {{1,-1}, {2,-1}, {3,-2}, {0,5}, {3,-4}};
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			assert (leftMostPoint == Point (3,-4));
+		}
+
+		{ // find point with smallest slope - easy case (different order)
+			const Point startPoint{0, 0};
+			const PointSet points = {{3,-4}, {1,-1}, {2,-1}, {3,-2}, {0,5}};
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			assert (leftMostPoint == Point (3, -4));
+		}
+
+		{ // find point with smallest slope - multiple points with same slope
+			const Point startPoint {0, 0};
+			const PointSet points = {{1,-1}, {2,-1}, {2,-2}, {0,5}};
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			assert (leftMostPoint == Point (2,-2));
+		}
+
+		{ // find point with smallest slope - startPoint is the leftmost point
+			const Point startPoint {3,-1};
+			const PointSet points = {{1,-1}, {2,-1}, {2,-2}, {0,5}};
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			assert (leftMostPoint == Point (0,5));
+		}
+
+		{ // find next point for bounding polygon - next point would be through a vertical line
+			const Point startPoint {3,-1};
+			const PointSet points = {{1,-1}, {2,-1}, {3,2}, {0,5}};
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			assert (leftMostPoint == Point (3,2));
+		}
+
+		{ // find next point for bounding polygon - next point would be through a vertical line, several points on the line
+			const Point startPoint{3,-1};
+			const PointSet points = {{1,-1}, {2,-1}, {3,2}, {0,5}, {3,-2}, {3,1}, {3,8}};
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			assert (leftMostPoint == Point (3,8));
+		}
+
+		{ // find point with smallest slope - multiple points with same slope - left direction
+			const Point startPoint {3,-1};
+			const PointSet points = {{1,-1}, {2,-1}, {2,1}, {0,5}, {1,3}};
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			assert (leftMostPoint == Point (0,5));
+		}
+
+		{ // find next point for bounding polygon - next point would be through a vertical line, left side
+			const Point startPoint {0,5};
+			const PointSet points = {{1,-1}, {2,-1}, {3,-2}, {0,0}, {3,-4}};
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			assert (leftMostPoint == Point (0, 0));
 		}
 	}
 }

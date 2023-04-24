@@ -53,6 +53,7 @@ namespace Geometry
 
 
     Point FindLeftMostPoint (const PointSet& points);
+    Point FindNextPointInBoundingPolygon (const PointSet& points, const Point& startPoint);
 }
 
 
