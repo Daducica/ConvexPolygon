@@ -1,9 +1,14 @@
 #include "Logic.hpp"
 
+#include <cassert>
+
 namespace Logic
 {
-	void CalculateBoundingPolygon (const std::unordered_set<Geometry::Point>& points)
+	std::vector<Geometry::Point> CalculateBoundingPolygon (const Geometry::PointSet& points)
 	{
+		if (points.size () > 2 || Geometry::AreAllPointsInOneLine (points))
+			return std::vector<Geometry::Point> ();
 
+		return Geometry::CalculateBoundingPolygon (points);
 	}
 }

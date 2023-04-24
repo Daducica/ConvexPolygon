@@ -151,5 +151,57 @@ namespace Test
 			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
 			assert (leftMostPoint == Point (0, 0));
 		}
+
+		{ // same x coords
+			const PointSet points = {{0,5}, {0,1}, {0,-2}, {0,0}};
+			assert (AreAllPointsInOneLine (points) == true);
+		}
+
+		{ // one point with different x coord
+			const PointSet points = {{0,5}, {0,1}, {1,-1}, {0,-2}, {0,0}};
+			assert (AreAllPointsInOneLine (points) == false);
+		}
+
+		{ // same y coors
+			const PointSet points = {{5,0}, {1,0}, {-2,0}, {0,0}};
+			assert (AreAllPointsInOneLine (points) == true);
+		}
+
+		{ // one point with different y coord
+			const PointSet points = {{5,0}, {1,0}, {-2,-2}, {0,0}};
+			assert (AreAllPointsInOneLine (points) == false);
+		}
+
+		{ // calculate polygon - simple triangle
+			const PointSet points = {{0,0}, {2,0}, {1,2}};
+			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
+			assert (boundingPoints.size () == points.size () + 1);
+			assert (boundingPoints[0] == Point (0,0));
+			assert (boundingPoints[1] == Point (2,0));
+			assert (boundingPoints[2] == Point (1,2));
+			assert (boundingPoints[3] == Point (0,0));
+		}
+
+		{ // calculate polygon - all lines needed, contains vertical lines
+			const PointSet points = {{0,0}, {0,2}, {2,0}, {1,2}, {2,1}};
+			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
+			assert (boundingPoints.size () == points.size () + 1);
+			assert (boundingPoints[0] == Point (0,0));
+			assert (boundingPoints[1] == Point (2,0));
+			assert (boundingPoints[2] == Point (2,1));
+			assert (boundingPoints[3] == Point (1,2));
+			assert (boundingPoints[4] == Point (0,2));
+			assert (boundingPoints[5] == Point (0,0));
+		}
+
+		{ // calculate polygon - not every line is needed
+			const PointSet points = {{1,2}, {1,1}, {1,0}, {2,0}, {0,0}};
+			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
+			assert (boundingPoints.size () == 4);
+			assert (boundingPoints[0] == Point (0, 0));
+			assert (boundingPoints[1] == Point (2, 0));
+			assert (boundingPoints[2] == Point (1, 2));
+			assert (boundingPoints[3] == Point (0, 0));
+		}
 	}
 }

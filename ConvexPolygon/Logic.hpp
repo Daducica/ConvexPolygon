@@ -2,12 +2,13 @@
 #define LOGIC_HPP
 
 #include <unordered_set>
+#include <vector>
 
 #include "Geometry.hpp"
 
 namespace Logic
 {
-	void CalculateBoundingPolygon (const std::unordered_set<Geometry::Point>& points);
+	std::vector<Geometry::Point> CalculateBoundingPolygon (const Geometry::PointSet& points);
 }
 
 

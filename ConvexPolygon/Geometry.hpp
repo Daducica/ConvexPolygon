@@ -54,6 +54,8 @@ namespace Geometry
 
     Point FindLeftMostPoint (const PointSet& points);
     Point FindNextPointInBoundingPolygon (const PointSet& points, const Point& startPoint);
+    bool AreAllPointsInOneLine (const PointSet& points);
+    std::vector<Point> CalculateBoundingPolygon (const PointSet& points);
 }
 
 

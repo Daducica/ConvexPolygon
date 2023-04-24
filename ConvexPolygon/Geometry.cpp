@@ -131,11 +131,15 @@ namespace Geometry
     static bool IsLineVerticalToNextPoint (const NextPointAnalysisCache& nextPointCache)
     {
         const bool isStartPointOnRightEdge = nextPointCache.maxXCoord == nextPointCache.startPoint.x;
+        const bool isStartPointOnLeftEdge = nextPointCache.minXCoord == nextPointCache.startPoint.x;
+
+        if (isStartPointOnRightEdge && isStartPointOnLeftEdge)
+            return true;
+
         if (isStartPointOnRightEdge) {
             Point highestYPoint = FindPointWithHighestYCoord (nextPointCache.verticalLinePointSet, nextPointCache.startPoint);
             return highestYPoint.y > nextPointCache.startPoint.y;
         }       
-        const bool isStartPointOnLeftEdge = nextPointCache.minXCoord == nextPointCache.startPoint.x;
         if (isStartPointOnLeftEdge) {
             Point lowestYPoint = FindPointWithLowestYCoord (nextPointCache.verticalLinePointSet, nextPointCache.startPoint);
             return lowestYPoint.y < nextPointCache.startPoint.y;
@@ -146,11 +150,11 @@ namespace Geometry
 
     static Point HandleVerticalLinesOnEdges (const NextPointAnalysisCache& nextPointCache)
     {
-        const bool rightSide = nextPointCache.maxXCoord == nextPointCache.startPoint.x;
-        if (rightSide) { // search upwards
-            return FindPointWithHighestYCoord (nextPointCache.verticalLinePointSet, nextPointCache.startPoint);
-        } else { // left side, search downwards
+        const bool leftSide = nextPointCache.minXCoord == nextPointCache.startPoint.x;
+        if (leftSide) { // search upwards
             return FindPointWithLowestYCoord (nextPointCache.verticalLinePointSet, nextPointCache.startPoint);
+        } else { // left side, search downwards
+            return FindPointWithHighestYCoord (nextPointCache.verticalLinePointSet, nextPointCache.startPoint);
         }
     }
 
@@ -168,10 +172,10 @@ namespace Geometry
                 pointWithSmallestSlope = point;
             } else if (slope == smallestSlope) {
                 if (nextPointCache.maxXCoord > nextPointCache.startPoint.x) { // search in the right direction
-                    if (point.y < pointWithSmallestSlope.y)
+                    if (point.x > pointWithSmallestSlope.x)
                         pointWithSmallestSlope = point;
                 } else { // search in the left direction
-                    if (point.y > pointWithSmallestSlope.y)
+                    if (point.x < pointWithSmallestSlope.x)
                         pointWithSmallestSlope = point;
                 }
             }
@@ -192,5 +196,53 @@ namespace Geometry
             return HandleVerticalLinesOnEdges (nextPointCache);
 
         return FindPointWithSmallestSlope (nextPointCache);
+    }
+
+
+    bool AreAllPointsInOneLine (const PointSet& points)
+    {
+        const Point point = *points.begin ();
+        const int y = point.y;
+        const int x = point.x;
+
+        bool sameYCoords = true;
+        bool sameXCoords = true;
+
+        for (const Point& point : points) {
+            if (sameYCoords && point.y != y)
+                sameYCoords = false;
+            if (sameXCoords && point.x != x)
+                sameXCoords = false;
+        }
+
+        return sameYCoords || sameXCoords;
+    }
+
+
+    std::vector<Point> CalculateBoundingPolygon (const PointSet& points)
+    {
+        assert (points.size () > 2);
+        assert (!Geometry::AreAllPointsInOneLine (points));
+
+        std::vector<Point> boundingPoints;
+
+        PointSet unusedPoints = points;
+
+        Point leftMostPoint = FindLeftMostPoint (points);
+        unusedPoints.erase (leftMostPoint);
+        Point nextPoint = FindNextPointInBoundingPolygon (unusedPoints, leftMostPoint);
+        unusedPoints.insert (leftMostPoint);
+
+        boundingPoints.push_back (leftMostPoint);
+        boundingPoints.push_back (nextPoint);
+
+        while (nextPoint != leftMostPoint)
+        {
+            unusedPoints.erase (nextPoint);
+            nextPoint = FindNextPointInBoundingPolygon (unusedPoints, nextPoint);
+            boundingPoints.push_back (nextPoint);
+        }
+
+        return boundingPoints;
     }
 }
