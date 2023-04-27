@@ -152,6 +152,11 @@ namespace Test
 			assert (leftMostPoint == Point (0, 0));
 		}
 
+		{ // two points
+			const PointSet points = {{0,5}, {0,1}};
+			assert (AreAllPointsInOneLine (points) == true);
+		}
+
 		{ // same x coords
 			const PointSet points = {{0,5}, {0,1}, {0,-2}, {0,0}};
 			assert (AreAllPointsInOneLine (points) == true);

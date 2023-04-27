@@ -214,6 +214,9 @@ namespace Geometry
 
     bool AreAllPointsInOneLine (const PointSet& points)
     {
+        if (points.size () < 3)
+            return true;
+
         const Point point = *points.begin ();
         const int y = point.y;
         const int x = point.x;
