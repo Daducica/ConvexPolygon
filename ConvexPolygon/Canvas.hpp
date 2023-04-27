@@ -11,14 +11,20 @@ namespace UI
     class Canvas : public wxPanel
     {
         Geometry::PointSet points;
+        Geometry::Polygon polygonPoints;
 
         void PaintNow ();
         void Render (wxDC& dc);
+        void DrawPoints (wxDC& dc);
+        void DrawPolygon (wxDC& dc);
     public:
-        Canvas (wxFrame* parent);
+        Canvas (wxFrame* parent, const wxPoint& position, const wxSize& size);
 
         void PaintEvent (wxPaintEvent& evt);
         void MouseReleased (wxMouseEvent& event);
+        void ClearPoints ();
+        const Geometry::PointSet& GetCurrentPointSet () const;
+        void DrawNewPolygon (const Geometry::Polygon& newPolygonPoints);
 
         DECLARE_EVENT_TABLE ()
     };

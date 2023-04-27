@@ -6,6 +6,8 @@
 namespace Resources
 {
 	const char* DialogTitle = "Convex Bounding Polygon";
+	const char* ClearButtonText = "Clear Canvas";
+	const char* DrawPolygonButtonText = "Draw Polygon";
 }
 
 

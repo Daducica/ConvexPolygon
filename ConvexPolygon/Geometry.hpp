@@ -1,8 +1,9 @@
-#ifndef GEMOTERY_HPP
+#ifndef GEOMETRY_HPP
 #define GEOMETRY_HPP
 
 #include <memory>
 #include <unordered_set>
+#include <vector>
 
 namespace Geometry
 {
@@ -25,7 +26,13 @@ namespace Geometry
 
 
     typedef std::unordered_set<Point, Point::HashFunction> PointSet;
+    typedef std::vector<Geometry::Point> Polygon;
 
+    enum class SearchDirection
+    {
+        Right,
+        Left
+    };
 
     struct GeneralLine
     {
@@ -53,7 +60,7 @@ namespace Geometry
 
 
     Point FindLeftMostPoint (const PointSet& points);
-    Point FindNextPointInBoundingPolygon (const PointSet& points, const Point& startPoint);
+    Point FindNextPointInBoundingPolygon (const PointSet& points, const Point& startPoint, SearchDirection searchDirection);
     bool AreAllPointsInOneLine (const PointSet& points);
     std::vector<Point> CalculateBoundingPolygon (const PointSet& points);
 }

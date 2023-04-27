@@ -99,56 +99,56 @@ namespace Test
 		{ // find point with smallest slope - easy case
 			const Point startPoint {0, 0};
 			const PointSet points = {{1,-1}, {2,-1}, {3,-2}, {0,5}, {3,-4}};
-			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint, SearchDirection::Right);
 			assert (leftMostPoint == Point (3,-4));
 		}
 
 		{ // find point with smallest slope - easy case (different order)
 			const Point startPoint{0, 0};
 			const PointSet points = {{3,-4}, {1,-1}, {2,-1}, {3,-2}, {0,5}};
-			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint, SearchDirection::Right);
 			assert (leftMostPoint == Point (3, -4));
 		}
 
 		{ // find point with smallest slope - multiple points with same slope
 			const Point startPoint {0, 0};
 			const PointSet points = {{1,-1}, {2,-1}, {2,-2}, {0,5}};
-			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint, SearchDirection::Right);
 			assert (leftMostPoint == Point (2,-2));
 		}
 
 		{ // find point with smallest slope - startPoint is the leftmost point
 			const Point startPoint {3,-1};
 			const PointSet points = {{1,-1}, {2,-1}, {2,-2}, {0,5}};
-			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint, SearchDirection::Left);
 			assert (leftMostPoint == Point (0,5));
 		}
 
 		{ // find next point for bounding polygon - next point would be through a vertical line
 			const Point startPoint {3,-1};
 			const PointSet points = {{1,-1}, {2,-1}, {3,2}, {0,5}};
-			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint, SearchDirection::Right);
 			assert (leftMostPoint == Point (3,2));
 		}
 
 		{ // find next point for bounding polygon - next point would be through a vertical line, several points on the line
 			const Point startPoint{3,-1};
 			const PointSet points = {{1,-1}, {2,-1}, {3,2}, {0,5}, {3,-2}, {3,1}, {3,8}};
-			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint, SearchDirection::Right);
 			assert (leftMostPoint == Point (3,8));
 		}
 
 		{ // find point with smallest slope - multiple points with same slope - left direction
 			const Point startPoint {3,-1};
 			const PointSet points = {{1,-1}, {2,-1}, {2,1}, {0,5}, {1,3}};
-			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint, SearchDirection::Left);
 			assert (leftMostPoint == Point (0,5));
 		}
 
 		{ // find next point for bounding polygon - next point would be through a vertical line, left side
 			const Point startPoint {0,5};
 			const PointSet points = {{1,-1}, {2,-1}, {3,-2}, {0,0}, {3,-4}};
-			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint);
+			const Point leftMostPoint = FindNextPointInBoundingPolygon (points, startPoint, SearchDirection::Right);
 			assert (leftMostPoint == Point (0, 0));
 		}
 
@@ -198,10 +198,32 @@ namespace Test
 			const PointSet points = {{1,2}, {1,1}, {1,0}, {2,0}, {0,0}};
 			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
 			assert (boundingPoints.size () == 4);
-			assert (boundingPoints[0] == Point (0, 0));
-			assert (boundingPoints[1] == Point (2, 0));
-			assert (boundingPoints[2] == Point (1, 2));
-			assert (boundingPoints[3] == Point (0, 0));
+			assert (boundingPoints[0] == Point (0,0));
+			assert (boundingPoints[1] == Point (2,0));
+			assert (boundingPoints[2] == Point (1,2));
+			assert (boundingPoints[3] == Point (0,0));
+		}
+
+
+		{ // calculate polygon - not every line is needed
+			const PointSet points = {{0,-1}, {1,1}, {-1,1}};
+			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
+			assert (boundingPoints.size () == 4);
+			assert (boundingPoints[0] == Point (-1,1));
+			assert (boundingPoints[1] == Point (0,-1));
+			assert (boundingPoints[2] == Point (1,1));
+			assert (boundingPoints[3] == Point (-1,1));
+		}
+
+		{ // calculate polygon - not every line is needed
+			const PointSet points = {{1,1}, {4,0}, {2,3}, {5,2}};
+			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
+			assert (boundingPoints.size () == 5);
+			assert (boundingPoints[0] == Point (1,1));
+			assert (boundingPoints[1] == Point (4,0));
+			assert (boundingPoints[2] == Point (5,2));
+			assert (boundingPoints[3] == Point (2,3));
+			assert (boundingPoints[4] == Point (1,1));
 		}
 	}
 }

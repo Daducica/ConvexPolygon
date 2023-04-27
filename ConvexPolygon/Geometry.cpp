@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <functional>
+#include <optional>
 
 namespace Geometry
 {
@@ -160,32 +161,44 @@ namespace Geometry
 
 
     // if multiple points result in the same slope, choose the farthest point
-    static Point FindPointWithSmallestSlope (const NextPointAnalysisCache& nextPointCache)
+    static Point FindPointWithSmallestSlope (const NextPointAnalysisCache& nextPointCache, SearchDirection searchDirection)
     {
         assert (nextPointCache.slopeValuesForMathematicalPoints.size () > 0);
 
-        Point pointWithSmallestSlope = nextPointCache.slopeValuesForMathematicalPoints.begin ()->first;
-        double smallestSlope = nextPointCache.slopeValuesForMathematicalPoints.begin ()->second;
+        std::optional<Point> pointWithSmallestSlope;
+        std::optional<double> smallestSlope;
         for (const auto& [point, slope] : nextPointCache.slopeValuesForMathematicalPoints) {
-            if (slope < smallestSlope) {
+            if (searchDirection == SearchDirection::Right && point.x < nextPointCache.startPoint.x)
+                continue;
+            if (searchDirection == SearchDirection::Left && point.x > nextPointCache.startPoint.x)
+                continue;
+
+            if (!smallestSlope.has_value ()) {
                 smallestSlope = slope;
                 pointWithSmallestSlope = point;
-            } else if (slope == smallestSlope) {
-                if (nextPointCache.maxXCoord > nextPointCache.startPoint.x) { // search in the right direction
-                    if (point.x > pointWithSmallestSlope.x)
+                continue;
+            }
+
+            if (slope < smallestSlope.value ()) {
+                smallestSlope = slope;
+                pointWithSmallestSlope = point;
+            } else if (slope == smallestSlope.value ()) {
+                if (searchDirection == SearchDirection::Right) {
+                    if (point.x > pointWithSmallestSlope.value ().x)
                         pointWithSmallestSlope = point;
-                } else { // search in the left direction
-                    if (point.x < pointWithSmallestSlope.x)
+                } else {
+                    if (point.x < pointWithSmallestSlope.value ().x)
                         pointWithSmallestSlope = point;
                 }
             }
         }
-        return pointWithSmallestSlope;
+        assert (pointWithSmallestSlope.has_value ());
+        return pointWithSmallestSlope.value ();
     }
 
 
     // assumes that the startPoint is correct
-    Point FindNextPointInBoundingPolygon (const PointSet& points, const Point& startPoint)
+    Point FindNextPointInBoundingPolygon (const PointSet& points, const Point& startPoint, SearchDirection searchDirection)
     {
         assert (points.size () > 0);
         assert (points.find (startPoint) == points.end ());
@@ -195,7 +208,7 @@ namespace Geometry
         if (IsLineVerticalToNextPoint (nextPointCache))
             return HandleVerticalLinesOnEdges (nextPointCache);
 
-        return FindPointWithSmallestSlope (nextPointCache);
+        return FindPointWithSmallestSlope (nextPointCache, searchDirection);
     }
 
 
@@ -219,27 +232,47 @@ namespace Geometry
     }
 
 
+    static int FindMaxXCoord (const PointSet& points)
+    {
+        assert (points.size () > 0);
+
+        int maxXCoord = (*points.begin ()).x;
+        for (const Point& point : points) {
+            if (point.x > maxXCoord) {
+                maxXCoord = point.x;
+            }
+        }
+        return maxXCoord;
+    }
+
+
     std::vector<Point> CalculateBoundingPolygon (const PointSet& points)
     {
         assert (points.size () > 2);
         assert (!Geometry::AreAllPointsInOneLine (points));
 
+        const int maxXCoord = FindMaxXCoord (points);
+        SearchDirection searchDirection = SearchDirection::Right;
         std::vector<Point> boundingPoints;
-
         PointSet unusedPoints = points;
 
         Point leftMostPoint = FindLeftMostPoint (points);
         unusedPoints.erase (leftMostPoint);
-        Point nextPoint = FindNextPointInBoundingPolygon (unusedPoints, leftMostPoint);
+        Point nextPoint = FindNextPointInBoundingPolygon (unusedPoints, leftMostPoint, searchDirection);
+        if (nextPoint.x == maxXCoord)
+            searchDirection = SearchDirection::Left;
         unusedPoints.insert (leftMostPoint);
 
         boundingPoints.push_back (leftMostPoint);
         boundingPoints.push_back (nextPoint);
 
+
         while (nextPoint != leftMostPoint)
         {
             unusedPoints.erase (nextPoint);
-            nextPoint = FindNextPointInBoundingPolygon (unusedPoints, nextPoint);
+            nextPoint = FindNextPointInBoundingPolygon (unusedPoints, nextPoint, searchDirection);
+            if (nextPoint.x == maxXCoord)
+                searchDirection = SearchDirection::Left;
             boundingPoints.push_back (nextPoint);
         }
 
