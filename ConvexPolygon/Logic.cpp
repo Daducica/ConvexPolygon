@@ -4,35 +4,39 @@
 
 namespace Logic
 {
-	static Geometry::PointSet ConvertUICoordsToLogicalCoords (const Geometry::PointSet& uiPoints)
+	Geometry::PointSet ConvertUIPointsToLogicalPoints (const Model::UIPointSet& uiPoints)
 	{
-		Geometry::PointSet logicalCoords;
-		for (const Geometry::Point& point : uiPoints) {
-			Geometry::Point reversedPoint = point;
-			reversedPoint.y = -reversedPoint.y;
-			logicalCoords.insert (reversedPoint);
+		Geometry::PointSet logicalPoints;
+		for (const wxPoint& point : uiPoints) {
+			Geometry::Point reversedPoint {point.x, -point.y};
+			logicalPoints.insert (reversedPoint);
 		}
-		return logicalCoords;
+		return logicalPoints;
 	}
 
 
-	static void TransformToUICoords (Geometry::Polygon& logicalCoords)
+	Model::UIPolygon ConvertLogicalPointsToUIPoints (Geometry::Polygon& logicalPoints)
 	{
-		for (Geometry::Point& point : logicalCoords) {
-			point.y = -point.y;
+		Model::UIPolygon uiPoints;
+		for (Geometry::Point& point : logicalPoints) {
+			wxPoint reversedPoint {point.x, -point.y};
+			uiPoints.push_back (reversedPoint);
 		}
+		return uiPoints;
 	}
 
 
-	Geometry::Polygon CalculateBoundingPolygon (const Geometry::PointSet& points)
+	Model::UIPolygon CalculateBoundingPolygon (const Model::UIPointSet& points)
 	{
-		if (points.size () < 3 || Geometry::AreAllPointsInOneLine (points))
-			return std::vector<Geometry::Point> ();
+		Geometry::PointSet logicalPoints = ConvertUIPointsToLogicalPoints (points);
+		if (points.size () < 3 || Geometry::AreAllPointsInOneLine (logicalPoints))
+			return Model::UIPolygon ();
 
-		Geometry::PointSet logicalCoords = ConvertUICoordsToLogicalCoords (points);
-		Geometry::Polygon polygonPoints = Geometry::CalculateBoundingPolygon (logicalCoords);
-		TransformToUICoords (polygonPoints);
+		Geometry::Polygon polygonPoints = Geometry::CalculateBoundingPolygon (logicalPoints);
 
-		return polygonPoints;
+		assert (polygonPoints.size () > 2);
+		
+		polygonPoints.push_back (polygonPoints[0]);
+		return ConvertLogicalPointsToUIPoints (polygonPoints);
 	}
 }

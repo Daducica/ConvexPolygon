@@ -181,55 +181,50 @@ namespace Test
 		{ // calculate polygon - simple triangle
 			const PointSet points = {{0,0}, {2,0}, {1,2}};
 			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
-			assert (boundingPoints.size () == points.size () + 1);
+			assert (boundingPoints.size () == points.size ());
 			assert (boundingPoints[0] == Point (0,0));
 			assert (boundingPoints[1] == Point (2,0));
 			assert (boundingPoints[2] == Point (1,2));
-			assert (boundingPoints[3] == Point (0,0));
 		}
 
 		{ // calculate polygon - all points needed, contains vertical lines
 			const PointSet points = {{0,0}, {0,2}, {2,0}, {1,2}, {2,1}};
 			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
-			assert (boundingPoints.size () == points.size () + 1);
+			assert (boundingPoints.size () == points.size ());
 			assert (boundingPoints[0] == Point (0,0));
 			assert (boundingPoints[1] == Point (2,0));
 			assert (boundingPoints[2] == Point (2,1));
 			assert (boundingPoints[3] == Point (1,2));
 			assert (boundingPoints[4] == Point (0,2));
-			assert (boundingPoints[5] == Point (0,0));
 		}
 
 		{ // calculate polygon - not every point is needed
 			const PointSet points = {{1,2}, {1,1}, {1,0}, {2,0}, {0,0}};
 			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
-			assert (boundingPoints.size () == 4);
+			assert (boundingPoints.size () == 3);
 			assert (boundingPoints[0] == Point (0,0));
 			assert (boundingPoints[1] == Point (2,0));
 			assert (boundingPoints[2] == Point (1,2));
-			assert (boundingPoints[3] == Point (0,0));
 		}
 
 
 		{ // calculate polygon - not every point is needed
 			const PointSet points = {{0,-1}, {1,1}, {-1,1}};
 			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
-			assert (boundingPoints.size () == 4);
+			assert (boundingPoints.size () == 3);
 			assert (boundingPoints[0] == Point (-1,1));
 			assert (boundingPoints[1] == Point (0,-1));
 			assert (boundingPoints[2] == Point (1,1));
-			assert (boundingPoints[3] == Point (-1,1));
 		}
 
 		{ // calculate polygon - not every point is needed
 			const PointSet points = {{1,1}, {4,0}, {2,3}, {5,2}};
 			std::vector<Point> boundingPoints = CalculateBoundingPolygon (points);
-			assert (boundingPoints.size () == 5);
+			assert (boundingPoints.size () == 4);
 			assert (boundingPoints[0] == Point (1,1));
 			assert (boundingPoints[1] == Point (4,0));
 			assert (boundingPoints[2] == Point (5,2));
 			assert (boundingPoints[3] == Point (2,3));
-			assert (boundingPoints[4] == Point (1,1));
 		}
 
 		{ // large amount of points
@@ -247,12 +242,11 @@ namespace Test
 			auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
 			assert (duration.count () < 10);
 
-			assert (boundingPoints.size () == 5);
+			assert (boundingPoints.size () == 4);
 			assert (boundingPoints[0] == Point (lowerBound, lowerBound));
 			assert (boundingPoints[1] == Point (upperBound, lowerBound));
 			assert (boundingPoints[2] == Point (upperBound, upperBound));
 			assert (boundingPoints[3] == Point (lowerBound, upperBound));
-			assert (boundingPoints[4] == Point (lowerBound, lowerBound));
 		}
 	}
 }

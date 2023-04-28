@@ -4,18 +4,11 @@
 #include "wx/wx.h"
 #include <wx/wxprec.h>
 
+#include "ButtonStateNotifier.hpp"
+
 namespace UI
 {
     class Canvas;
-
-    class ButtonStateNotifier
-    {
-    public:
-        virtual void SetClearCanvasButtonState (bool newState) = 0;
-        virtual void SetDrawPolygonButtonState (bool newState) = 0;
-        virtual ~ButtonStateNotifier ();
-    };
-
 
     class Frame : public wxFrame, public ButtonStateNotifier
     {

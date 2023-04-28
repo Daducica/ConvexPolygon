@@ -17,16 +17,24 @@ namespace Geometry
 
         bool operator== (const Point& otherPoint) const;
         bool operator!= (const Point& otherPoint) const;
-
-        struct HashFunction
-        {
-            size_t operator() (const Point& point) const;
-        };
     };
 
 
-    typedef std::unordered_set<Point, Point::HashFunction> PointSet;
-    typedef std::vector<Geometry::Point> Polygon;
+    template <typename PointTpye>
+    struct PointHashFunction
+    {
+        size_t operator() (const PointTpye& point) const
+        {
+            const size_t xHash = std::hash<int> ()(point.x);
+            const size_t yHash = std::hash<int> ()(point.y) << 1;
+            return xHash ^ yHash;
+        }
+    };
+
+
+    typedef PointHashFunction<Point> GeometryPointHashFunction;
+    typedef std::unordered_set<Point, GeometryPointHashFunction> PointSet;
+    typedef std::vector<Point> Polygon;
 
     enum class SearchDirection
     {

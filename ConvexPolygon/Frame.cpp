@@ -6,8 +6,6 @@
 
 namespace UI
 {
-    ButtonStateNotifier::~ButtonStateNotifier () = default;
-
     const wxPoint DefaultAppPosition {50, 50};
     const wxSize DefaultAppSize {1200, 700};
 
@@ -59,7 +57,7 @@ namespace UI
         if (canvas->GetCurrentPointSet ().size () < 3)
             return;
 
-        Geometry::Polygon polygonPoints = Logic::CalculateBoundingPolygon (canvas->GetCurrentPointSet ());
+        Model::UIPolygon polygonPoints = Logic::CalculateBoundingPolygon (canvas->GetCurrentPointSet ());
         canvas->DrawNewPolygon (polygonPoints);
     }
 

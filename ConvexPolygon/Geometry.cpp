@@ -18,14 +18,6 @@ namespace Geometry
     }
 
 
-    size_t Point::HashFunction::operator() (const Point& point) const
-    {
-        const size_t xHash = std::hash<int> ()(point.x);
-        const size_t yHash = std::hash<int> ()(point.y) << 1;
-        return xHash ^ yHash;
-    }
-
-
     GeneralLine::~GeneralLine () = default;
 
 
@@ -69,8 +61,10 @@ namespace Geometry
 
     struct NextPointAnalysisCache
     {
+        using SlopePointMap = std::unordered_map<Point, double, GeometryPointHashFunction>;
+
         const Point& startPoint;
-        std::unordered_map<Point, double, Point::HashFunction> slopeValuesForMathematicalPoints;
+        SlopePointMap slopeValuesForMathematicalPoints;
         PointSet verticalLinePointSet;
         int maxXCoord;
         int minXCoord;
@@ -152,9 +146,9 @@ namespace Geometry
     static Point HandleVerticalLinesOnEdges (const NextPointAnalysisCache& nextPointCache)
     {
         const bool leftSide = nextPointCache.minXCoord == nextPointCache.startPoint.x;
-        if (leftSide) { // search upwards
+        if (leftSide) {
             return FindPointWithLowestYCoord (nextPointCache.verticalLinePointSet, nextPointCache.startPoint);
-        } else { // left side, search downwards
+        } else {
             return FindPointWithHighestYCoord (nextPointCache.verticalLinePointSet, nextPointCache.startPoint);
         }
     }
@@ -265,18 +259,14 @@ namespace Geometry
         if (nextPoint.x == maxXCoord)
             searchDirection = SearchDirection::Left;
         unusedPoints.insert (leftMostPoint);
-
         boundingPoints.push_back (leftMostPoint);
-        boundingPoints.push_back (nextPoint);
 
-
-        while (nextPoint != leftMostPoint)
-        {
+        while (nextPoint != leftMostPoint) {
+            boundingPoints.push_back (nextPoint);
             unusedPoints.erase (nextPoint);
             nextPoint = FindNextPointInBoundingPolygon (unusedPoints, nextPoint, searchDirection);
             if (nextPoint.x == maxXCoord)
                 searchDirection = SearchDirection::Left;
-            boundingPoints.push_back (nextPoint);
         }
 
         return boundingPoints;

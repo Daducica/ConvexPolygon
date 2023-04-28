@@ -4,10 +4,14 @@
 #include <unordered_set>
 
 #include "Geometry.hpp"
+#include "Model.hpp"
 
 namespace Logic
 {
-	Geometry::Polygon CalculateBoundingPolygon (const Geometry::PointSet& points);
+	Geometry::PointSet ConvertUIPointsToLogicalPoints (const Model::UIPointSet& uiPoints);
+	Model::UIPolygon ConvertLogicalPointsToUIPoints (Geometry::Polygon& logicalPoints);
+
+	Model::UIPolygon CalculateBoundingPolygon (const Model::UIPointSet& points);
 }
 
 

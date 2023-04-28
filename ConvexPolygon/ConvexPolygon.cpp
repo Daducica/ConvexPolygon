@@ -14,8 +14,8 @@ class MyApp : public wxApp
     UI::Frame* frame;
 };
 
-
 IMPLEMENT_APP (MyApp)
+
 
 bool MyApp::OnInit ()
 {

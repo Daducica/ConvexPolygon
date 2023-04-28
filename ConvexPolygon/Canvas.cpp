@@ -1,6 +1,7 @@
 #include "Canvas.hpp"
 
-#include "Frame.hpp"
+#include "ButtonStateNotifier.hpp"
+#include "Logic.hpp"
 
 namespace UI
 {
@@ -18,8 +19,8 @@ namespace UI
 
     Canvas::Canvas (wxFrame* parent, const wxPoint& position, const wxSize& size, ButtonStateNotifier& buttonStateNotifier) :
         wxPanel (parent, -1, position, size),
-        buttonStateNotifier (buttonStateNotifier),
-        upToDatePolygon (true)
+        data (*this),
+        buttonStateNotifier (buttonStateNotifier)
     {
     }
 
@@ -46,26 +47,12 @@ namespace UI
     }
 
 
-    void Canvas::AddPoint (const wxPoint& newWxPoint)
-    {
-        const Geometry::Point newPoint {newWxPoint.x, newWxPoint.y};
-        points.insert (newPoint);
-        buttonStateNotifier.SetClearCanvasButtonState (true);
-        if (!Geometry::AreAllPointsInOneLine (points)) {
-            buttonStateNotifier.SetDrawPolygonButtonState (true);
-        }
-        if (upToDatePolygon)
-            upToDatePolygon = false;
-        PaintNow ();
-    }
-
-
     void Canvas::DrawPoints (wxDC& dc)
     {
         const int xSize = 6;
         const int halfXSize = xSize / 2;
         dc.SetPen (wxPen (wxColor (0, 0, 0), 2));
-        for (const Geometry::Point& point : points) {
+        for (const wxPoint& point : data.GetPoints ()) {
             dc.DrawLine (point.x - halfXSize, point.y - halfXSize, point.x + halfXSize, point.y + halfXSize);
             dc.DrawLine (point.x - halfXSize, point.y + halfXSize, point.x + halfXSize, point.y - halfXSize);
         }
@@ -74,14 +61,16 @@ namespace UI
 
     void Canvas::DrawPolygon (wxDC& dc)
     {
-        if (polygonPoints.size () < 2)
+
+        const Model::UIPolygon polygon = data.GetPolygonPoints ();
+        if (polygon.size () < 2)
             return;
 
-        dc.SetPen (wxPen (upToDatePolygon ? PolygonColor : InvalidPolygonColor, 2));
+        dc.SetPen (wxPen (data.IsPolygonUpToDate () ? PolygonColor : InvalidPolygonColor, 2));
 
-        for (int index = 0; index < polygonPoints.size () - 1; index++) {
-            const Geometry::Point& point1 = polygonPoints[index];
-            const Geometry::Point& point2 = polygonPoints[index + 1];
+        for (int index = 0; index < polygon.size () - 1; index++) {
+            const wxPoint& point1 = polygon[index];
+            const wxPoint& point2 = polygon[index + 1];
             dc.DrawLine (point1.x, point1.y, point2.x, point2.y);
         }
     }
@@ -89,33 +78,48 @@ namespace UI
 
     void Canvas::MouseReleased (wxMouseEvent& event)
     {
-        const wxPoint newWxPoint = event.GetPosition ();
-        AddPoint (newWxPoint);
+        data.AddPoint (event.GetPosition ());
     }
 
 
     void Canvas::ClearPoints ()
     {
-        points.clear ();
-        polygonPoints.clear ();
+        data.ClearPoints ();
+    }
+
+
+    const Model::UIPointSet& Canvas::GetCurrentPointSet () const
+    {
+        return data.GetPoints ();
+    }
+
+
+    void Canvas::DrawNewPolygon (const Model::UIPolygon& newPolygonPoints)
+    {
+        data.UpdatePolygon (newPolygonPoints);
+    }
+
+
+    void Canvas::PointAdded ()
+    {
+        buttonStateNotifier.SetClearCanvasButtonState (true);
+        if (!Geometry::AreAllPointsInOneLine (Logic::ConvertUIPointsToLogicalPoints (data.GetPoints ()))) {
+            buttonStateNotifier.SetDrawPolygonButtonState (true);
+        }
+        PaintNow ();
+    }
+    
+    
+    void Canvas::CanvasCleared ()
+    {
         buttonStateNotifier.SetClearCanvasButtonState (false);
         buttonStateNotifier.SetDrawPolygonButtonState (false);
         PaintNow ();
     }
-
-
-    const Geometry::PointSet& Canvas::GetCurrentPointSet () const
+    
+    
+    void Canvas::PolygonUpdated ()
     {
-        return points;
-    }
-
-
-    void Canvas::DrawNewPolygon (const Geometry::Polygon& newPolygonPoints)
-    {
-        assert (newPolygonPoints.size () > 2);
-        polygonPoints = newPolygonPoints;
-        upToDatePolygon = true;
         PaintNow ();
     }
-
 }

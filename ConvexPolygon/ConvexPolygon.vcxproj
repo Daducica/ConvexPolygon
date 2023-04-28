@@ -142,17 +142,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ButtonStateNotifier.hpp" />
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Frame.hpp" />
     <ClInclude Include="Logic.hpp" />
+    <ClInclude Include="Model.hpp" />
     <ClInclude Include="UnitTest.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ButtonStateNotifier.cpp" />
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="ConvexPolygon.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Logic.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="UnitTest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
