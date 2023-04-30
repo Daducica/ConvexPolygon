@@ -71,6 +71,7 @@ namespace Geometry
     Point FindNextPointInBoundingPolygon (const PointSet& points, const Point& startPoint, SearchDirection searchDirection);
     bool AreAllPointsInOneLine (const PointSet& points);
     std::vector<Point> CalculateBoundingPolygon (const PointSet& points);
+    bool CheckIfPolygonContainsAllPoints (const std::vector<Point>& polygon, const PointSet& points);
 }
 
 

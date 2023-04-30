@@ -6,6 +6,8 @@
 
 namespace Geometry
 {
+    const double EPS = 0.00001;
+
     bool Point::operator== (const Point& otherPoint) const
     {
         return this->x == otherPoint.x && this->y == otherPoint.y;
@@ -270,5 +272,116 @@ namespace Geometry
         }
 
         return boundingPoints;
+    }
+
+
+    enum class LocationRelativeToLine
+    {
+        UnderOrRight,
+        AboveOrLeft,
+        OnLine
+    };
+
+
+
+    struct LineAndLocation
+    {
+        std::unique_ptr<GeneralLine> line;
+        LocationRelativeToLine location;
+
+        LineAndLocation (std::unique_ptr<GeneralLine> line, LocationRelativeToLine location) :
+            line (std::move (line)),
+            location (location)
+        { }
+    };
+
+
+    static LocationRelativeToLine GetLocationForLineAndPoint (const std::unique_ptr<GeneralLine>& line, const Point& point)
+    {
+        const MathematicalLine* mathematicalLine = dynamic_cast<MathematicalLine*>(line.get ());
+        if (mathematicalLine != nullptr) {
+            const double yCoordForPointOnLine = mathematicalLine->slope * point.x + mathematicalLine->yOffset;
+            assert (abs(yCoordForPointOnLine - point.y) > EPS);
+            if (yCoordForPointOnLine > point.y)
+                return LocationRelativeToLine::UnderOrRight;
+            else
+                return LocationRelativeToLine::AboveOrLeft;
+        } else {
+            const VerticalLine* verticalLine = static_cast<VerticalLine*>(line.get ());
+            assert (verticalLine->x != point.x);
+            if (verticalLine->x < point.x)
+                return LocationRelativeToLine::UnderOrRight;
+            else
+                return LocationRelativeToLine::AboveOrLeft;
+        }
+        assert (true);
+        return LocationRelativeToLine::OnLine;
+    }
+
+
+    static std::vector<LineAndLocation> PolygonPointsToLines (const std::vector<Point>& polygon)
+    {
+        assert (polygon.size () > 2);
+
+        std::vector<LineAndLocation> lines;
+        for (int i = 0; i < polygon.size (); ++i) {
+            const int index1 = i;
+            const int index2 = i == polygon.size () - 1 ? 0 : i + 1;
+            const Point point1 = polygon[index1];
+            const Point point2 = polygon[index2];
+            std::unique_ptr<GeneralLine> line = GeneralLine::CreateLine (point1, point2);
+            int referenceIndex = index2 + 1 == polygon.size () ? 0 : index2 + 1;
+            const LocationRelativeToLine location = GetLocationForLineAndPoint (line, polygon[referenceIndex]);
+            lines.push_back (LineAndLocation (std::move(line), location));
+        }
+        return lines;
+    }
+
+
+    static bool CheckIfPointIsOnTheCorrectSide (const LineAndLocation& lineInfo, const Point& point)
+    {
+        const MathematicalLine* mathematicalLine = dynamic_cast<MathematicalLine*>(lineInfo.line.get ());
+        if (mathematicalLine != nullptr) {
+            const double yCoordForPointOnLine = mathematicalLine->slope * point.x + mathematicalLine->yOffset;
+            if (abs(yCoordForPointOnLine - point.y) < EPS)
+                return true;
+            if (yCoordForPointOnLine < point.y && lineInfo.location == LocationRelativeToLine::AboveOrLeft)
+                return true;
+            if (yCoordForPointOnLine > point.y && lineInfo.location == LocationRelativeToLine::UnderOrRight)
+                return true;
+        } else {
+            const VerticalLine* verticalLine = static_cast<VerticalLine*>(lineInfo.line.get ());
+            if (verticalLine->x == point.x)
+                return true;
+            if (verticalLine->x < point.x && lineInfo.location == LocationRelativeToLine::UnderOrRight)
+                return true;
+            if (verticalLine->x > point.x && lineInfo.location == LocationRelativeToLine::AboveOrLeft)
+                return true;
+        }
+        return false;
+    }
+
+
+    static bool CheckIfPointIsInPolygon (const std::vector<LineAndLocation>& lines, const Point& point)
+    {
+        for (const LineAndLocation& lineInfo : lines) {
+            if (!CheckIfPointIsOnTheCorrectSide (lineInfo, point))
+                return false;
+        }
+        return true;
+    }
+
+
+    bool CheckIfPolygonContainsAllPoints (const std::vector<Point>& polygon, const PointSet& points)
+    {
+        assert (polygon.size () > 2);
+
+        std::vector<LineAndLocation> lines = PolygonPointsToLines (polygon);
+        for (const Point& point : points) {
+            if (!CheckIfPointIsInPolygon (lines, point))
+                return false;
+        }
+
+        return true;
     }
 }

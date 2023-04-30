@@ -35,7 +35,8 @@ namespace Logic
 		Geometry::Polygon polygonPoints = Geometry::CalculateBoundingPolygon (logicalPoints);
 
 		assert (polygonPoints.size () > 2);
-		
+		assert (Geometry::CheckIfPolygonContainsAllPoints (polygonPoints, logicalPoints));
+
 		polygonPoints.push_back (polygonPoints[0]);
 		return ConvertLogicalPointsToUIPoints (polygonPoints);
 	}
